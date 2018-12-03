@@ -33,7 +33,7 @@
     
     
     <script>    
-    var scene, camera, renderer, mesh, raycaster, base, braccio1, braccio2, coso, mano, soggetto, mat, controllo;
+    var scene, camera, renderer, mesh, raycaster, base, braccio1, braccio2, pistone, barra, mano, soggetto, mat, controllo;
     var mouse = new THREE.Vector2();
     var testo = document.getElementById("testo");
     var s = "", st = "";
@@ -80,30 +80,33 @@
         
 
         //######CARICO MODELLO######
-        // var loader = new THREE.GLTFLoader();
+        var loader = new THREE.GLTFLoader();
         // var FBXLoader = require('three-fbx-loader');
-        var loader = new THREE.JSONLoader();
-        loader.load('Modelli/braccioV4.json', function( fbx, a){
+        // var loader = new THREE.JSONLoader();
+        loader.load('Modelli/braccioV5B.gltf', function(mod){
             
-            // base = fbx.scene.children[0];
-            // // base.material = new THREE.MeshToonMaterial({color: 0x000000});
+            base = mod.scene.children[0];
+            base.material = new THREE.MeshToonMaterial({color: 0x000000});
             
-            // braccio1 = base.children[0];
-            // // braccio1.material = new THREE.MeshToonMaterial({color: 0x000000});
+            braccio1 = base.children[0];
+            braccio1.material = new THREE.MeshToonMaterial({color: 0x000000});
             
-            // braccio2 = braccio1.children[0];
-            // // braccio2.material = new THREE.MeshToonMaterial({color: 0x000000});
+            braccio2 = braccio1.children[0];
+            braccio2.material = new THREE.MeshToonMaterial({color: 0x000000});
             
-            // coso = braccio1.children[1];
-            // // coso.material = new THREE.MeshToonMaterial({color: 0x000000});
+            pistone = braccio1.children[1];
+            pistone.material = new THREE.MeshToonMaterial({color: 0x000000});
             
-            // mano = braccio2.children[0];
-            // mano.material = new THREE.MeshToonMaterial({color: 0x000000});
+            barra = braccio2.children[0];
+            barra.material = new THREE.MeshToonMaterial({color: 0x000000});
+
+            mano = braccio2.children[1];
+            mano.material = new THREE.MeshToonMaterial({color: 0x000000});
             
             
             // percorsoAlberoRicorsivo(0, gltf.scene.children[0]);
             
-            scene.add(fbx);
+            scene.add(base);
             base.position.x = 0;
             base.position.y = 0;
             base.position.z = 0;
@@ -145,17 +148,47 @@
     animate();
 
 
+    var posizione = new THREE.Vector3();
+    var flagiIsPressed = false;
     function animate(){
+
+        if(flagiIsPressed){
+            if(ABraccio2 > -3.14/4) {
+                ABraccio2 -= 0.01;
+            } else {
+                flagiIsPressed=!flagiIsPressed;
+            }
+        } else {
+            if(ABraccio2 < +3.14/4) {
+                ABraccio2 += 0.01;
+            } else {
+                flagiIsPressed=!flagiIsPressed;
+            }
+        }
         // if(elementoCaricato){
         //     for(i = 0; i<arrayModello.length; i++){
         //         //SETTO TUTTI GLI ANGOLI
         //     }
         // }
         if(elementoCaricato){
-            // base.rotation.y = Abase;
-            // braccio2.rotation.x = Math.PI/8;    
+            base.rotation.y = Abase;
+            braccio2.rotation.x = ABraccio2;    
+            
+            base.getWorldPosition(posizione);
+            // pistone.lookAt(base.position);
+            // console.log(base.position);
+            // pistone.rotation.x = Math.PI/4;
+            // pistone.getWorldPosition(posizione);
+            posizione.set(0, 0, 0);
+            barra.updateMatrixWorld();
+            // barra.worldToLocal(posizione);
+            barra.matrixWorld.transformPosition( posizione );
+            // console.log(posizione);
+            barra.lookAt(posizione);
+
+            
             // coso.rotation.x = Acoso;
-            console.log(coso.rotation.x);
+            // console.log(coso.rotation.x);
         }
         
         render();
@@ -307,16 +340,13 @@
     // var c1 = 1.981584, c2 = 0.577036, i = 1.783922, s = 0;
     function alza(){
         if(ABraccio2 < 3.14/4)ABraccio2 += 0.02;
-        // i = c1^2 + c2^2 - 2*c1*c2*Math.cos(Math.PI/2 - ABraccio2 - 0.1625630392598);
-        
-        // Acoso = Math.asin(c2/i * Math.sin(Math.PI/2 - ABraccio2 - 0.1625630392598));
-        // Acoso = 0;
+        pistone.lookAt(barra.position);
+        // barra.lookAt(pistone.position);
     }
 
     function abbassa(){
         if(ABraccio2 > -3.14/4) ABraccio2 -= 0.02;
-        // Acoso = Math.asin(c2*Math.sin(Math.PI - ABraccio2)/(c1^2 + c2^2 - 2*c1*c2*Math.cos(Math.PI - ABraccio2)));
-        // Acoso = 0;
+        // barra.lookAt(pistone.position);
     }
 
     function destra(){
