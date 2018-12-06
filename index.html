@@ -46,6 +46,10 @@
 
 
     var material = new THREE.MeshNormalMaterial();
+
+
+    //####Sensori####
+    var pointsG = [], pointsR = [], sensori = [] /* vettore di Vector2*/, lMax = 2, lMedPerc = 0.5, m = 2.3, x = 0.6, q = -m*x;
     
     //######FLAG######
     var elementoCaricato = false, dirBraccio2 = true, flagVisibilitaPannelli = new Array();
@@ -75,14 +79,12 @@
 
 
         //######HELPER######
-        // var assi = new THREE.AxesHelper( 100 );
-        // scene.add(assi);   
+        var assi = new THREE.AxesHelper( 100 );
+        scene.add(assi);   
         
 
         //######CARICO MODELLO######
         var loader = new THREE.GLTFLoader();
-        // var FBXLoader = require('three-fbx-loader');
-        // var loader = new THREE.JSONLoader();
         loader.load('Modelli/braccioV5B.gltf', function(mod){
             
             base = mod.scene.children[0];
@@ -115,6 +117,20 @@
         }, undefined, function(error){
             console.log(error);
         });
+
+
+        //#########SEONSORI###########
+
+        
+        Sensori();
+
+
+
+
+
+
+
+
 
         //######RENDER######
         glRenderer = new THREE.WebGLRenderer({antialias: true});
@@ -174,21 +190,6 @@
             base.rotation.y = Abase;
             braccio2.rotation.x = ABraccio2;    
             
-            base.getWorldPosition(posizione);
-            // pistone.lookAt(base.position);
-            // console.log(base.position);
-            // pistone.rotation.x = Math.PI/4;
-            // pistone.getWorldPosition(posizione);
-            posizione.set(0, 0, 0);
-            barra.updateMatrixWorld();
-            // barra.worldToLocal(posizione);
-            barra.matrixWorld.transformPosition( posizione );
-            // console.log(posizione);
-            barra.lookAt(posizione);
-
-            
-            // coso.rotation.x = Acoso;
-            // console.log(coso.rotation.x);
         }
         
         render();
@@ -221,7 +222,6 @@
         //##################################
 
         glRenderer.render(scene, camera);
-        // testo.children[0].textContent = s;
     }
 
     function onMqttSignal(e){
@@ -263,44 +263,40 @@
         // st= "asse X ->" + event.clientX + " " + mouse.x + "\n" +"asse Y ->" + event.clientY + " " + mouse.y + "\n";
     }
 
-    function onmouseup(){
-        flagiIsPressed = false;
-    }
-
     var v;
-    function onmouseclick(){
+    // function onmouseclick(){
 
-        if((soggetto != undefined)&&(soggetto!=null)){
+    //     if((soggetto != undefined)&&(soggetto!=null)){
             
-            if((v = modello.get(soggetto)) != undefined){
-                v.position.x = puntoInt.x + v.scale.x/2;
-                v.position.y = puntoInt.y + v.scale.y/2;
-                v.position.z = puntoInt.z;
-                v.visible = !v.visible;
-                // console.log(v.matrixWorld);
-                // console.log(camera.matrixWorld);
+    //         if((v = modello.get(soggetto)) != undefined){
+    //             v.position.x = puntoInt.x + v.scale.x/2;
+    //             v.position.y = puntoInt.y + v.scale.y/2;
+    //             v.position.z = puntoInt.z;
+    //             v.visible = !v.visible;
+    //             // console.log(v.matrixWorld);
+    //             // console.log(camera.matrixWorld);
 
 
-                // function time(){
-                //     var l = v;
-                //     setTimeout(function(){l.visible = false;}, 3000);
-                // }
-                // time();
+    //             // function time(){
+    //             //     var l = v;
+    //             //     setTimeout(function(){l.visible = false;}, 3000);
+    //             // }
+    //             // time();
 
-                // window.setTimeout(function(l = v){l.visible = false;}, 6000);
-            } else if (soggetto.name == "pannello") {
-                soggetto.visible = false;
-            }
-            // v = modello.get(soggetto);
-            // modello.get(soggetto).visible =! modello.get(soggetto).visible;
+    //             // window.setTimeout(function(l = v){l.visible = false;}, 6000);
+    //         } else if (soggetto.name == "pannello") {
+    //             soggetto.visible = false;
+    //         }
+    //         // v = modello.get(soggetto);
+    //         // modello.get(soggetto).visible =! modello.get(soggetto).visible;
             
-            console.log(puntoInt);
+    //         console.log(puntoInt);
 
 
             
-        }
+    //     }
        
-    }
+    // }
 
     //##############################
     //##############################
@@ -339,14 +335,43 @@
 
     // var c1 = 1.981584, c2 = 0.577036, i = 1.783922, s = 0;
     function alza(){
-        if(ABraccio2 < 3.14/4)ABraccio2 += 0.02;
-        pistone.lookAt(barra.position);
-        // barra.lookAt(pistone.position);
+        // if(ABraccio2 < 3.14/4)ABraccio2 += 0.02;
+        // pistone.lookAt(barra.position);
+        // // barra.lookAt(pistone.position);
+
+        if(lMedPerc < 1){
+            lMedPerc += 0.1;
+
+            pointsG[pointsG.length-1].x = (lMax*lMedPerc-q)/m;
+            pointsG[pointsG.length-1].y = lMax*lMedPerc;
+            pointsR[0].x = pointsG[pointsG.length-1].x;
+            pointsR[0].y = pointsG[pointsG.length-1].y;
+            
+            sensori[0].x.geometry = new THREE.LatheGeometry( pointsG, 16 );
+            sensori[0].y.geometry = new THREE.LatheGeometry( pointsR, 16 );
+        } 
     }
 
     function abbassa(){
-        if(ABraccio2 > -3.14/4) ABraccio2 -= 0.02;
-        // barra.lookAt(pistone.position);
+        // if(ABraccio2 > -3.14/4) ABraccio2 -= 0.02;
+        // // barra.lookAt(pistone.position);
+
+        if(lMedPerc > 0){
+            lMedPerc -= 0.1;
+
+            pointsG[pointsG.length-1].x = (lMax*lMedPerc-q)/m;
+            pointsG[pointsG.length-1].y = lMax*lMedPerc;
+            pointsR[0].x = pointsG[pointsG.length-1].x;
+            pointsR[0].y = pointsG[pointsG.length-1].y;
+
+            console.log(lMax);
+            console.log(lMedPerc);
+            console.log(lMax*lMedPerc);
+
+            
+            sensori[0].x.geometry = new THREE.LatheGeometry( pointsG, 16 );
+            sensori[0].y.geometry = new THREE.LatheGeometry( pointsR, 16 );
+        } 
     }
 
     function destra(){
@@ -356,6 +381,81 @@
     function sinistra(){
         Abase -= 0.02;
     }
+
+
+    
+
+    function Sensori(){
+
+        var GsensoreG, GsensoreR, sensoreG, sensoreR;
+        var MsensoreG = new THREE.MeshBasicMaterial({ color: 0xffff10, transparent: true, opacity: 0.8});
+        var MsensoreR = new THREE.MeshBasicMaterial({ color: 0xe90000, transparent: true, opacity: 0.8});
+
+        pointsG.push(new THREE.Vector2(0, 0));
+        pointsG.push(new THREE.Vector2(x, m*x + q));
+        pointsG.push(new THREE.Vector2((lMax*lMedPerc-q)/m, lMax*lMedPerc));
+
+        pointsR.push(new THREE.Vector2(pointsG[pointsG.length-1].x, pointsG[pointsG.length-1].y));
+        pointsR.push(new THREE.Vector2((lMax-q)/m, lMax));
+        pointsR.push(new THREE.Vector2((lMax-q)/m - 0.0001, lMax));
+
+        GsensoreG = new THREE.LatheGeometry( pointsG, 16 );
+        GsensoreR = new THREE.LatheGeometry( pointsR, 16 );
+
+//SENSORE 1
+        sensoreG = new THREE.Mesh(GsensoreG, MsensoreG);
+        sensoreG.rotation.z = -Math.PI/2;
+        sensoreG.position.x = 0.6;
+        scene.add(sensoreG);
+        
+        sensoreR = new THREE.Mesh(GsensoreR, MsensoreR);
+        sensoreR.rotation.z = sensoreG.rotation.z;
+        sensoreR.position.x = sensoreG.position.x;
+        scene.add(sensoreR);
+        
+        sensori.push(new THREE.Vector2(sensoreG, sensoreR));
+
+//SENSORE 2
+        sensoreG = new THREE.Mesh(GsensoreG, MsensoreG);
+        sensoreG.rotation.x = -Math.PI/2;
+        sensoreG.position.z = -0.6;
+        scene.add(sensoreG);
+        
+        sensoreR = new THREE.Mesh(GsensoreR, MsensoreR);
+        sensoreR.rotation.x = sensoreG.rotation.x;
+        sensoreR.position.z = sensoreG.position.z;
+        scene.add(sensoreR);
+        
+        sensori.push(new THREE.Vector2(sensoreG, sensoreR));
+
+//SENSORE 3
+        sensoreG = new THREE.Mesh(GsensoreG, MsensoreG);
+        sensoreG.rotation.z = Math.PI/2;
+        sensoreG.position.x = -0.6;
+        scene.add(sensoreG);
+        
+        sensoreR = new THREE.Mesh(GsensoreR, MsensoreR);
+        sensoreR.rotation.z = sensoreG.rotation.z;
+        sensoreR.position.x = sensoreG.position.x;
+        scene.add(sensoreR);
+        
+        sensori.push(new THREE.Vector2(sensoreG, sensoreR));
+
+//SENSORE 4
+        sensoreG = new THREE.Mesh(GsensoreG, MsensoreG);
+        sensoreG.rotation.x = Math.PI/2;
+        sensoreG.position.z = 0.6;
+        scene.add(sensoreG);
+        
+        sensoreR = new THREE.Mesh(GsensoreR, MsensoreR);
+        sensoreR.rotation.x = sensoreG.rotation.x;
+        sensoreR.position.z = sensoreG.position.z;
+        scene.add(sensoreR);
+        
+        sensori.push(new THREE.Vector2(sensoreG, sensoreR));
+        
+    }
+
     </script>
     
 </body>
