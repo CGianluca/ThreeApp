@@ -12,7 +12,7 @@
 
     <script>
     
-    var camera, scene, renderer;
+    var camera, scene, renderer, cubo2;
 
     init();
     function init(){
@@ -37,10 +37,14 @@
         // cubo.lookAt(0, 1, 0);#
 
         material = new THREE.MeshPhysicalMaterial({color: 0xff0000});
-        var cubo2 = new THREE.Mesh(Gcubo, material);
-        cubo2.position.set(0, 0, 4); 
+        cubo2 = new THREE.Mesh(Gcubo, material);
+        cubo2.position.set(0, 0, -3); 
         cubo.add(cubo2);
-        console.log(cubo2.matrixWorld);
+
+        // console.log(cubo2.matrixWorld);
+        
+        cubo2.updateMatrixWorld();
+        // console.log(cubo2.matrixWorld.elements[14]);
 /*
 
         MATRICE DA MOBILE A FISSO -> matrixWorld
@@ -75,7 +79,7 @@
 
 */
         var m = new THREE.Matrix4();
-        cubo2.matrixWorld.getInverse(m);
+        m.getInverse(cubo2.matrixWorld);
         
 
         // m.setPosition(new THREE.Vector3(0, 0, -4));
@@ -89,7 +93,7 @@
 
         console.log(v);
 
-
+        cubo3.up.set(0, 0, 1);
         cubo3.lookAt(v); // punta al RF del''oggetto, in questo caso quello di cubo2
         cubo2.add(cubo3);
 
